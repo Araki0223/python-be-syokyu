@@ -12,6 +12,7 @@ from .models.list_model import ListModel
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from .dependencies import get_db
+from fastapi import HTTPException
 # from datetime import datetime
 
 DEBUG = os.environ.get("DEBUG", "") == "true"
@@ -108,6 +109,20 @@ def post_todo_list(new_todo_list: NewTodoList, db: Session = Depends(get_db)):
     # model_dump() は NewTodoList のデータを { "title": "xxx", "description": "yyy" } の辞書に変換する。
     # ListModel(**辞書) により、辞書のキーを ListModel の引数に展開し、新しいデータベースレコードを作成 する。
     db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+@app.put("/lists/{todo_list_id}", tags=["Todoリスト"], response_model=ResponseTodoList)
+def put_todo_list(update_todo_list: UpdateTodoList, todo_list_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(ListModel).filter(ListModel.id == todo_list_id).first() # データベースからレコードを取得
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Todoリストが見つかりません")  # 404エラーハンドリング
+
+    update_data = update_todo_list.model_dump(exclude_unset=True)  # リクエストボディのデータを辞書に変換
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+
     db.commit()
     db.refresh(db_item)
     return db_item
