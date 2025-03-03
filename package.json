@@ -1,0 +1,11 @@
+{
+  "name": "python-be-syokyu",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Araki0223/python-be-syokyu.git",
+  "author": "Araki <davidsizu5051r2@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.50.1"
+  }
+}
