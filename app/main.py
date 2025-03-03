@@ -9,6 +9,11 @@ from app.const import TodoItemStatusCode
 from .models.item_model import ItemModel
 from .models.list_model import ListModel
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from .dependencies import get_db
+# from datetime import datetime
+
 DEBUG = os.environ.get("DEBUG", "") == "true"
 
 app = FastAPI(
@@ -88,3 +93,21 @@ def get_hello(message: str = "Hello", name: str = "TechTrain"):
 @app.get("/health", tags=["System"])
 def get_health():
     return {"status": "ok"}
+
+@app.get("/lists/{todo_list_id}", tags=["Todoリスト"])
+def get_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(ListModel).filter(ListModel.id == todo_list_id).first()
+    if db_item is None:
+        return {"message": "Not Found"}
+    return db_item
+
+@app.post("/lists", tags=["Todoリスト"], response_model=ResponseTodoList)
+def post_todo_list(new_todo_list: NewTodoList, db: Session = Depends(get_db)):
+    db_item = ListModel(**new_todo_list.model_dump()) 
+    # ListModelはNewTodoList(Pydanticモデル)で、辞書形式(dict)に変換する必要がある
+    # model_dump() は NewTodoList のデータを { "title": "xxx", "description": "yyy" } の辞書に変換する。
+    # ListModel(**辞書) により、辞書のキーを ListModel の引数に展開し、新しいデータベースレコードを作成 する。
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
