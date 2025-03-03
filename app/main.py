@@ -84,3 +84,7 @@ def get_hello(message: str = "Hello", name: str = "TechTrain"):
     # name = "TechTrain"
     return {"Message": f"{message} {name}!"}
     # return {"Message": "Hello TechTrain!"}
+
+@app.get("/health", tags=["System"])
+def get_health():
+    return {"status": "ok"}
