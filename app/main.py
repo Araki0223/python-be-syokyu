@@ -136,3 +136,15 @@ def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
     db.delete(db_item)
     db.commit()
     return {}
+
+@app.get("/lists/{todo_list_id}/items/{todo_item_id}", tags=["Todo項目"], response_model=ResponseTodoItem)
+def get_todo_item(todo_list_id: int, todo_item_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(ItemModel).filter(
+        ItemModel.id == todo_item_id,
+        ItemModel.todo_list_id == todo_list_id
+    ).first()
+
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Todoアイテムが見つかりません")
+    
+    return db_item
