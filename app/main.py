@@ -126,3 +126,13 @@ def put_todo_list(update_todo_list: UpdateTodoList, todo_list_id: int, db: Sessi
     db.commit()
     db.refresh(db_item)
     return db_item
+
+@app.delete("/lists/{todo_list_id}", tags=["Todoリスト"])
+def delete_todo_list(todo_list_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(ListModel).filter(ListModel.id == todo_list_id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Todoリストが見つかりません")
+    
+    db.delete(db_item)
+    db.commit()
+    return {}
