@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.dependencies import get_db
 from app.crud.list_crud import get_todo_list, create_todo_list, update_todo_list, delete_todo_list, get_all_todo_lists
@@ -11,9 +11,12 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[ResponseTodoList])
-def get_todo_lists(db: Session = Depends(get_db)):
+def get_todo_lists(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1),
+    db: Session = Depends(get_db)):
     """TODOリストの一覧を取得"""
-    return get_all_todo_lists(db)
+    return get_all_todo_lists(db, page, per_page)
 
 @router.get("/{todo_list_id}", response_model=ResponseTodoList)
 def read_todo_list(todo_list_id: int, db: Session = Depends(get_db)):

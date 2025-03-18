@@ -61,6 +61,7 @@ def delete_todo_item(db: Session, todo_list_id: int, todo_item_id: int):
     db.commit()
     return True
 
-def get_all_todo_items(db: Session, todo_list_id: int):
+def get_all_todo_items(db: Session, todo_list_id: int, page: int, per_page: int):
     """指定されたTODOリストのアイテムを全件取得"""
-    return db.query(ItemModel).filter(ItemModel.todo_list_id == todo_list_id).all()
+    offset = (page - 1) * per_page
+    return db.query(ItemModel).filter(ItemModel.todo_list_id == todo_list_id).offset(offset).limit(per_page).all()

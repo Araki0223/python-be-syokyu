@@ -38,6 +38,7 @@ def delete_todo_list(db: Session, todo_list_id: int):
     db.commit()
     return True
 
-def get_all_todo_lists(db: Session):
+def get_all_todo_lists(db: Session, page: int, per_page: int):
     """TODOリストを全件取得"""
-    return db.query(ListModel).all()
+    offset = (page - 1) * per_page
+    return db.query(ListModel).offset(offset).limit(per_page).all()
